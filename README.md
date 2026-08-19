@@ -19,28 +19,36 @@ Dans Foundry, créer une nouvelle macro de type **Script**, puis copier-coller l
 
 Ces macros n'utilisent que l'API de base de Foundry et fonctionnent quel que soit le système de jeu activé.
 
-### [`1-ancre-zero-v2.js`](foundry/1-ancre-zero-v2.js) — Définir l'ancre des tuiles/dessins
+### [`1-ancre-zero.js`](foundry/1-ancre-zero.js) — Définir l'ancre des tuiles/dessins
 
 Ouvre une fenêtre permettant de repositionner le point d'ancrage (X/Y, entre 0 et 1, `0,0` par défaut) des tuiles et/ou des dessins de la scène.
 - Si des tuiles/dessins sont sélectionnés, seuls ceux-ci sont modifiés.
 - Sinon, la macro s'applique à toutes les tuiles et tous les dessins de la scène active.
+- Neuf préréglages rapides (coins, centres, milieu) en plus de la saisie manuelle de X/Y.
 - Des cases à cocher permettent de cibler uniquement les tuiles, uniquement les dessins, ou les deux.
 
-### [`2-redimensionner-tuiles-v2.js`](foundry/2-redimensionner-tuiles-v2.js) — Redimensionner les tuiles
+### [`2-redimensionner-tuiles.js`](foundry/2-redimensionner-tuiles.js) — Redimensionner les tuiles
 
-Redimensionne les tuiles sélectionnées (ou toutes celles de la scène si rien n'est sélectionné) à une **hauteur cible en pixels**, en conservant leur ratio largeur/hauteur.
-- La taille d'origine de chaque tuile est sauvegardée dans un flag lors du premier redimensionnement.
-- La case **« Restaurer »** permet de rendre aux tuiles déjà redimensionnées leur taille d'origine (les tuiles jamais redimensionnées ne sont pas affectées).
+Redimensionne les tuiles sélectionnées (ou toutes celles de la scène si rien n'est sélectionné), en conservant leur ratio largeur/hauteur. Trois méthodes au choix :
+- à une **hauteur cible** en pixels ;
+- à une **largeur cible** en pixels ;
+- à un **pourcentage** de la taille actuelle (ex : 50 % pour réduire de moitié).
 
-### [`3-etiquettes-tuiles-v2.js`](foundry/3-etiquettes-tuiles-v2.js) — Étiquettes de tuiles
+La taille d'origine de chaque tuile est sauvegardée dans un flag lors du premier redimensionnement. Le mode **« Restaurer la taille d'origine »** permet de rendre aux tuiles déjà redimensionnées leur taille d'origine (les tuiles jamais redimensionnées ne sont pas affectées), avec un décompte des tuiles concernées.
 
-Crée automatiquement un texte (sous forme de dessin) sous chaque tuile sélectionnée (ou toutes celles de la scène), reprenant le nom du fichier image utilisé comme texture.
-- Personnalisation de la mise en forme du texte : police, taille, couleur, hauteur du bandeau.
+### [`3-etiquettes-tuiles.js`](foundry/3-etiquettes-tuiles.js) — Étiquettes de tuiles
+
+Crée automatiquement un texte (sous forme de dessin) sous ou au-dessus de chaque tuile sélectionnée (ou toutes celles de la scène), reprenant le nom du fichier image utilisé comme texture.
+- Personnalisation du texte : police, taille, couleur, hauteur de la zone.
+- Placement au choix : sous la tuile ou au-dessus.
+- Fond de couleur optionnel derrière le texte (couleur + opacité).
 - Options de nettoyage du nom de fichier : ne garder que ce qui suit un caractère séparateur (`-` par défaut) et/ou retirer un numéro en fin de nom (utile pour des noms de fichiers du type `monstre-gobelin-03.webp` → `gobelin`).
 
-### [`4-cacher-scene-v2.js`](foundry/4-cacher-scene-v2.js) — Cacher / afficher la scène
+### [`4-cacher-scene.js`](foundry/4-cacher-scene.js) — Cacher / afficher la scène
 
-Cache ou affiche en masse les tokens, dessins et/ou tuiles de la scène active, avec un choix indépendant pour chaque catégorie d'objet via des cases à cocher. Pratique pour préparer une scène (tout cacher) puis la révéler progressivement, ou tout dévoiler d'un coup.
+Cache ou affiche en masse les éléments de la scène active : tokens, dessins, tuiles et sources de lumière ambiante, avec un choix indépendant pour chaque catégorie via des cases à cocher.
+- Pour les tokens, possibilité de cibler soit tous ceux de la scène, soit uniquement ceux actuellement sélectionnés sur le plateau.
+- Pratique pour préparer une scène (tout cacher) puis la révéler progressivement, ou tout dévoiler d'un coup.
 
 ---
 
