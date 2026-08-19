@@ -1,8 +1,9 @@
 // =============================================================================
 // Macro : Jet combo Knight — demande groupée MJ -> Joueurs
-// Version : 1.15.0  (2026-08-19)
+// Version : 1.16.0  (2026-08-19)
 // Auteur  : Florleseige
 // Système : Knight (foundry-knight)
+// Compatibilité : FoundryVTT v14 (build 364) · Système Knight v3.58.35
 // =============================================================================
 //
 // USAGE :
@@ -31,6 +32,8 @@
 // -----------------------------------------------------------------------------
 // HISTORIQUE
 // -----------------------------------------------------------------------------
+// v1.16.0 - Ajout des versions compatibles (FoundryVTT et système Knight) dans
+//           l'en-tête.
 // v1.15.0 - CORRECTIF : relancer la macro après une mise à jour remplace bien
 //           l'écouteur de l'ancienne version (auparavant le garde-fou anti-doublon
 //           empêchait l'enregistrement du nouveau). Le type de message de requête
@@ -79,7 +82,7 @@
 
 (async () => {
 
-  const VERSION = "1.15.0";
+  const VERSION = "1.16.0";
 
   if (game.system.id !== "knight") {
     ui.notifications.error("Cette macro est prévue pour le système Knight.");

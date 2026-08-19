@@ -4,6 +4,13 @@ Recueil de macros personnalisées pour [Foundry Virtual Tabletop](https://foundr
 
 La plupart des macros sont génériques et fonctionnent sur n'importe quel système de jeu. Certaines sont en revanche écrites pour un système précis (elles utilisent son API ou ses données internes) et ne fonctionneront donc que si ce système est installé et activé sur le monde Foundry.
 
+## Compatibilité
+
+- **FoundryVTT** : toutes les macros sont testées sur la version **v14 (build 364)**.
+- **Knight** : les macros spécifiques à ce système sont testées avec la version **3.58.35**.
+
+La version FoundryVTT (et, le cas échéant, la version du système) compatible est rappelée dans l'en-tête de chaque fichier `.js`.
+
 ## Organisation du dépôt
 
 - [`foundry/`](foundry/) — macros génériques, indépendantes du système de jeu.
@@ -18,6 +25,8 @@ Dans Foundry, créer une nouvelle macro de type **Script**, puis copier-coller l
 ## Macros génériques (`foundry/`)
 
 Ces macros n'utilisent que l'API de base de Foundry et fonctionnent quel que soit le système de jeu activé.
+
+Compatibilité : **FoundryVTT v14 (build 364)**.
 
 ### [`1-ancre-zero.js`](foundry/1-ancre-zero.js) — Définir l'ancre des tuiles/dessins
 
@@ -59,6 +68,8 @@ Cache ou affiche en masse les éléments de la scène active : tokens, dessins, 
 Système : [Knight (foundry-knight)](https://github.com/Zakarik/foundry-knight)
 
 Ces macros utilisent l'API et les données du système Knight (`CONFIG.KNIGHT`, `game.knight`, etc.) et ne fonctionneront pas sur un autre système.
+
+Compatibilité : **FoundryVTT v14 (build 364)** · **Knight v3.58.35**.
 
 #### [`k1-jet-combo-groupe-2carac.js`](knight/k1-jet-combo-groupe-2carac.js) — Jet combo Knight (demande groupée MJ → Joueurs)
 

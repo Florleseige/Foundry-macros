@@ -1,8 +1,9 @@
 // =============================================================================
 // Macro : Ancre zéro — positionner l'ancre des tuiles et des dessins
-// Version : 2.0.0  (2026-08-19)
+// Version : 2.1.0  (2026-08-19)
 // Auteur  : Florleseige
 // Système : FoundryVTT (générique)
+// Compatibilité : FoundryVTT v14 (build 364)
 // =============================================================================
 //
 // USAGE :
@@ -19,6 +20,7 @@
 // -----------------------------------------------------------------------------
 // HISTORIQUE
 // -----------------------------------------------------------------------------
+// v2.1.0 - Ajout de la version FoundryVTT compatible dans l'en-tête.
 // v2.0.0 - Refonte graphique : sections encadrées, CSS variables, grille de
 //          préréglages, sublabels, hints. Standards harmonisés avec les autres macros.
 // v1.0.0 - Version initiale.
