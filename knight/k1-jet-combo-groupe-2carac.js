@@ -1,18 +1,30 @@
 // =============================================================================
 // Macro : Jet combo Knight — demande groupée MJ -> Joueurs
-// Version : 1.16.0  (2026-08-19)
+// Version : 1.18.0  (2026-08-20)
 // Auteur  : Florleseige
 // Système : Knight (foundry-knight)
 // Compatibilité : FoundryVTT v14 (build 364) · Système Knight v3.58.35
 // =============================================================================
 //
 // USAGE :
-// - Chaque joueur exécute cette macro UNE FOIS en début de session (clic dans la
-//   barre de sorts) pour activer l'écoute des demandes sur son client.
+// - Chaque joueur exécute cette macro UNE FOIS par chargement de page (clic dans
+//   la barre de sorts) pour activer l'écoute des demandes sur son client.
 //   L'écoute est perdue s'il recharge sa page : il doit alors recliquer.
 // - Le MJ sélectionne un ou plusieurs tokens de PJ, exécute la macro, choisit le
 //   ou les caractéristiques de base proposées + les options, puis envoie.
 // - Chaque joueur concerné reçoit une fenêtre lui demandant de compléter le jet.
+//
+// ENTRETIEN AUTOMATIQUE DES CLIENTS (depuis la v1.18) :
+// - À chaque exécution par le MJ, la macro interroge les clients puis :
+//     * joueur à l'écoute en version ANTÉRIEURE -> son client ré-exécute la macro
+//       tout seul et repart sur la version du MJ. Aucun clic, rien à annoncer.
+//     * joueur qui n'a PAS lancé la macro -> aucun code à nous ne tourne chez lui,
+//       il est donc IMPOSSIBLE de l'atteindre. Il reçoit un message chuchoté avec
+//       un lien cliquable qui active tout en un clic.
+// - Le MJ peut donc lancer la macro SANS token sélectionné : la mise à jour et les
+//   invitations sont faites, puis la macro s'arrête simplement.
+// - Exception unique : les clients restés en version < 1.18 ne connaissent pas le
+//   message de mise à jour. Ils passent par le lien chuchoté, une dernière fois.
 //
 // OPTIONS MJ :
 // - 1 ou 2 caractéristiques de base : en imposer une, ou en proposer deux au choix.
@@ -32,6 +44,16 @@
 // -----------------------------------------------------------------------------
 // HISTORIQUE
 // -----------------------------------------------------------------------------
+// v1.18.0 - Les joueurs n'ont plus à relancer la macro après une mise à jour :
+//           quand le MJ l'exécute, les clients à l'écoute en version antérieure
+//           ré-exécutent la macro d'eux-mêmes (message socket à identifiant stable
+//           + Macro#execute), et repartent donc sur le code du monde, c'est-à-dire
+//           celui du MJ. Les joueurs qui n'ont jamais lancé la macro — hors de
+//           portée par nature — reçoivent un lien cliquable chuchoté dans le chat
+//           qui l'active en un clic. Le registre des clients est vidé avant chaque
+//           interrogation : un joueur ayant rechargé sa page n'est plus affiché à
+//           tort comme « à l'écoute ».
+// v1.17.0 - Le message affiche les d6 lors du choix de la caractéristique.
 // v1.16.0 - Ajout des versions compatibles (FoundryVTT et système Knight) dans
 //           l'en-tête.
 // v1.15.0 - CORRECTIF : relancer la macro après une mise à jour remplace bien
@@ -80,14 +102,26 @@
 //          chaque joueur choisit son second trait.
 // =============================================================================
 
+// Foundry exécute le script d'une macro avec `this` lié au document Macro
+// (Macro##executeScript : fn.call(this, ...)). On le capture ici pour pouvoir
+// construire un lien cliquable vers nous-mêmes et demander une ré-exécution.
+// Test par documentName plutôt que `instanceof Macro` : la classe globale a changé
+// de place au fil des versions de Foundry, pas le nom du document.
+const MACRO_SELF = this?.documentName === "Macro" ? this : null;
+
 (async () => {
 
-  const VERSION = "1.16.0";
+  const VERSION = "1.18.0";
 
   if (game.system.id !== "knight") {
     ui.notifications.error("Cette macro est prévue pour le système Knight.");
     return;
   }
+
+  // Posé par la version précédente juste avant une ré-exécution automatique :
+  // la mise à jour est alors silencieuse (pas d'annonce dans le chat).
+  const silentReload = !!game.knight?._comboSilentReload;
+  if (game.knight) delete game.knight._comboSilentReload;
 
   const ASPECTS = CONFIG.KNIGHT.LIST.aspects;
   const CARACS_BY_ASPECT = CONFIG.KNIGHT.LIST.caracteristiques;
@@ -99,10 +133,18 @@
   // version n'y répondra pas (au lieu d'ouvrir une fenêtre obsolète en doublon).
   const MSG_TYPE = `knight-combo-macro-request-v${VERSION}`;
 
-  // Le ping/pong reste sur des identifiants STABLES entre versions, pour que le MJ
-  // puisse détecter les clients en version périmée et les signaler dans le tableau.
-  const MSG_PING = "knight-combo-macro-ping";   // MJ -> tous : « qui est à l'écoute ? »
-  const MSG_PONG = "knight-combo-macro-pong";   // client -> MJ : « je suis à l'écoute, en vX »
+  // Ces identifiants restent STABLES entre versions : c'est ce qui permet au MJ de
+  // parler aux clients restés en version antérieure, donc de les détecter ET de les
+  // mettre à jour. Ne JAMAIS y introduire le numéro de version.
+  const MSG_PING = "knight-combo-macro-ping";       // MJ -> tous : « qui est à l'écoute ? »
+  const MSG_PONG = "knight-combo-macro-pong";       // client -> MJ : « je suis à l'écoute, en vX »
+  const MSG_RELOAD = "knight-combo-macro-reload";   // MJ -> client périmé : « ré-exécute la macro »
+
+  // Le code de la macro vit dans le monde : dès que le MJ l'enregistre, tous les
+  // clients en ont déjà la nouvelle version. Seul leur écouteur EN COURS est périmé.
+  // Une simple ré-exécution suffit donc à les remettre à niveau.
+  const RELOAD_COOLDOWN_MS = 5 * 1000;        // anti-boucle sur les ré-exécutions
+  const INVITE_COOLDOWN_MS = 10 * 60 * 1000;  // anti-spam sur les invitations en chat
 
   const label = (key) => game.i18n.localize(LABELS[key] ?? key);
 
@@ -151,7 +193,7 @@
   function traitDisplay(actor, key, noOd = false) {
     const dice = traitDice(actor, key);
     const od = traitOD(actor, key, noOd);
-    return od > 0 ? `${dice}+${od}` : `${dice}`;
+    return od > 0 ? `${dice}d6+${od}` : `${dice}d6`;
   }
 
   function traitLabel(key) {
@@ -626,6 +668,72 @@
     return game.knight._comboActive;
   }
 
+  // Vidé avant chaque interrogation : sans cela, un joueur ayant rechargé sa page
+  // resterait affiché « à l'écoute » sur la foi d'une réponse périmée.
+  function resetRegistry() {
+    if (!game.knight) game.knight = {};
+    game.knight._comboActive = {};
+  }
+
+  // Horodatage des invitations déjà envoyées, par joueur (anti-spam du chat).
+  function inviteLog() {
+    if (!game.knight) game.knight = {};
+    if (!game.knight._comboInvites) game.knight._comboInvites = {};
+    return game.knight._comboInvites;
+  }
+
+  // Retrouve le document Macro correspondant à ce script.
+  // `this` est la source fiable ; le repli par contenu couvre les cas où la macro
+  // est exécutée autrement (console, appel indirect).
+  function findSelfMacro() {
+    if (MACRO_SELF) return MACRO_SELF;
+    return game.macros?.find(m => m.command?.includes(MSG_PING)) ?? null;
+  }
+
+  // Chuchote aux joueurs hors de portée un lien cliquable vers cette macro.
+  // Foundry exécute directement les liens @UUID pointant sur une Macro : un clic
+  // suffit donc à activer l'écoute (ou à la mettre à jour).
+  // C'est le SEUL recours pour un client où aucun de notre code ne tourne encore.
+  async function sendActivationInvite(users, { force = false } = {}) {
+    if (!users.length) return 0;
+
+    const macro = findSelfMacro();
+    if (!macro) {
+      ui.notifications.warn(
+        "Impossible de retrouver cette macro dans le répertoire : aucune invitation envoyée."
+      );
+      return 0;
+    }
+
+    const now = Date.now();
+    const log = inviteLog();
+    const targets = force
+      ? users
+      : users.filter(u => now - (log[u.id] ?? 0) >= INVITE_COOLDOWN_MS);
+
+    if (!targets.length) return 0;
+    for (const u of targets) log[u.id] = now;
+
+    await ChatMessage.create({
+      speaker: { alias: "Jet combo" },
+      whisper: targets.map(u => u.id),
+      content: `
+        <div style="border-left:3px solid #b08d3f;padding-left:10px;">
+          <b>🎲 Jets combo — activation nécessaire</b><br/>
+          <span style="opacity:0.85;font-size:0.92em;">
+            Votre client ne reçoit pas les demandes de jet du MJ.
+            Un clic suffit, à refaire après chaque rechargement de page.
+          </span>
+          <p style="margin:8px 0 2px 0;font-size:1.05em;">
+            👉 @UUID[${macro.uuid}]{Activer les jets combo}
+          </p>
+        </div>
+      `
+    });
+
+    return targets.length;
+  }
+
   // ---- Active l'écoute des demandes sur ce client ----
   // Relancer la macro après une mise à jour remplace l'écouteur de l'ancienne version.
   function ensureListener() {
@@ -653,6 +761,33 @@
       if (data.type === MSG_TYPE) {
         if (!data.targetUserIds?.includes(game.user.id)) return;
         openPlayerDialog(data);
+        return;
+      }
+
+      // Le MJ nous signale que notre version est périmée : on ré-exécute la macro.
+      // Son code est celui du monde, donc déjà celui du MJ — la ré-exécution suffit
+      // à remplacer cet écouteur-ci par celui de la nouvelle version.
+      if (data.type === MSG_RELOAD) {
+        if (!data.targetUserIds?.includes(game.user.id)) return;
+        if (data.version === VERSION) return; // déjà à jour
+
+        const now = Date.now();
+        if (now - (game.knight._comboLastReload ?? 0) < RELOAD_COOLDOWN_MS) return;
+        game.knight._comboLastReload = now;
+
+        // Lu par la nouvelle exécution : la mise à jour se fait sans annonce.
+        game.knight._comboSilentReload = true;
+
+        // Filet : si la ré-exécution n'aboutit pas (droits insuffisants, macro
+        // introuvable), l'indicateur ne doit pas museler la prochaine exécution.
+        setTimeout(() => { delete game.knight._comboSilentReload; }, 5000);
+
+        fromUuid(data.macroUuid)
+          .then(macro => macro?.execute())
+          .catch(() => ui.notifications.warn(
+            "Mise à jour automatique de la macro de jet combo impossible : relancez-la à la main."
+          ));
+
         return;
       }
 
@@ -698,6 +833,10 @@
       ? `Macro de jet combo mise à jour en v${VERSION} pour cette session.`
       : `Écoute des demandes de jet combo activée pour cette session. (v${VERSION})`);
 
+    // Mise à jour déclenchée par le MJ : il la voit dans son tableau, inutile de
+    // le prévenir une seconde fois dans le chat.
+    if (silentReload) return;
+
     // Message dans le chat pour que le MJ voie qui a bien lancé la macro.
     await ChatMessage.create({
       speaker: { alias: game.user.name },
@@ -715,15 +854,53 @@
     return;
   }
 
-  // ---- Côté MJ : on interroge les clients avant d'afficher la fenêtre ----
+  // ---- Côté MJ : interroger les clients, puis les remettre à niveau ----
+  resetRegistry();
+  registry()[game.user.id] = { version: VERSION, at: Date.now() };
+
   game.socket.emit(SOCKET_CHANNEL, { type: MSG_PING });
   await new Promise(resolve => setTimeout(resolve, 400));
+
+  const players = game.users.filter(u => u.active && !u.isGM);
+
+  // 1. À l'écoute mais en version antérieure : on les met à jour sans aucun clic.
+  const outdatedUsers = players.filter(u => {
+    const entry = registry()[u.id];
+    return entry && entry.version !== VERSION;
+  });
+
+  if (outdatedUsers.length > 0) {
+    const macro = findSelfMacro();
+
+    if (macro) {
+      game.socket.emit(SOCKET_CHANNEL, {
+        type: MSG_RELOAD,
+        targetUserIds: outdatedUsers.map(u => u.id),
+        macroUuid: macro.uuid,
+        version: VERSION
+      });
+
+      // Laisse aux clients le temps de ré-exécuter puis de se re-signaler, afin que
+      // le tableau ci-dessous reflète l'état réel et non celui d'avant la mise à jour.
+      await new Promise(resolve => setTimeout(resolve, 900));
+    }
+  }
+
+  // 2. Toujours pas à jour après cette tentative. Deux cas, même remède :
+  //    - macro jamais lancée : aucun de notre code ne tourne chez eux ;
+  //    - version antérieure à 1.18 : leur écouteur ignore MSG_RELOAD.
+  //    Dans les deux cas, seul un clic de leur part peut débloquer la situation.
+  const strandedUsers = players.filter(u => registry()[u.id]?.version !== VERSION);
+  const invited = strandedUsers.length > 0 ? await sendActivationInvite(strandedUsers) : 0;
 
   // ---- Côté MJ : préparer et envoyer la demande ----
   const tokens = canvas.tokens.controlled.filter(t => t.actor && PJ_TYPES.includes(t.actor.type));
 
   if (tokens.length === 0) {
-    ui.notifications.warn("Sélectionnez au moins un token de Chevalier/Méta-armure. (L'écoute est tout de même activée sur ce client.)");
+    ui.notifications.info(
+      `Clients passés en revue${invited ? `, ${invited} lien(s) d'activation envoyé(s)` : ", tous à jour"}. ` +
+      `Sélectionnez des tokens de Chevalier/Méta-armure pour demander un jet.`
+    );
     return;
   }
 
@@ -833,6 +1010,17 @@
           font-size: 11.5px; opacity: 0.7; font-style: italic;
           margin: 9px 0 0 0; line-height: 1.45;
         }
+
+        /* ---- Bouton d'action secondaire ---- */
+        .knight-mj-form .actions { margin: 9px 0 0 0; text-align: right; }
+        .knight-mj-form .actions button {
+          width: auto; font-size: 12.5px; line-height: 1.3; padding: 4px 12px;
+          border: 1px solid var(--k-line); border-radius: 5px; cursor: pointer;
+          background: rgba(255,255,255,0.07);
+        }
+        .knight-mj-form .actions button:hover {
+          border-color: var(--k-gold); background: var(--k-gold-soft);
+        }
       </style>
       <form class="knight-mj-form">
 
@@ -871,8 +1059,12 @@
             </tbody>
           </table>
           <p class="legend">
-            Version de référence : v${VERSION}. « ✖ non lancée » = le joueur doit cliquer
-            la macro pour recevoir les demandes ; « ⚠ » = version différente de la vôtre.
+            Version de référence : v${VERSION}. Les clients à l'écoute en version antérieure
+            viennent d'être mis à jour automatiquement. « ✖ non lancée » = le joueur n'a rien
+            lancé de la session : seul un clic de sa part peut l'activer.
+          </p>
+          <p class="actions">
+            <button type="button" id="inviteMissing">📣 Renvoyer le lien d'activation</button>
           </p>
         </div>
 
@@ -958,6 +1150,22 @@
         html.find("#base2Group").toggle(this.checked);
       });
 
+      // Relance manuelle de l'invitation, hors délai anti-spam.
+      html.find("#inviteMissing").on("click", async (ev) => {
+        ev.preventDefault();
+
+        const missing = game.users
+          .filter(u => u.active && !u.isGM && registry()[u.id]?.version !== VERSION);
+
+        if (missing.length === 0) {
+          ui.notifications.info(`Tous les joueurs connectés sont à l'écoute en v${VERSION}.`);
+          return;
+        }
+
+        const sent = await sendActivationInvite(missing, { force: true });
+        if (sent > 0) ui.notifications.info(`Lien d'activation envoyé à ${sent} joueur(s).`);
+      });
+
       // Le 3e trait n'existe que dans la fenêtre simplifiée, la fermeture auto
       // que dans la fenêtre native.
       html.find("#useNative").on("change", function () {
@@ -987,7 +1195,7 @@
 
           let sent = 0;
           const skipped = [];
-          const outdated = new Set();
+          const unreachable = new Map(); // id -> User, dédoublonné entre tokens
 
           for (const token of tokens) {
             const actor = token.actor;
@@ -997,10 +1205,11 @@
             const ownerIds = owners.map(u => u.id);
 
             // Un joueur en version différente ne réagira pas : le type de message
-            // de requête est lié à la version. On le signale explicitement.
+            // de requête est lié à la version. La mise à jour automatique a déjà eu
+            // lieu à l'ouverture, donc ceux qui restent sont bien hors de portée.
             for (const u of owners) {
               const entry = registry()[u.id];
-              if (!entry || entry.version !== VERSION) outdated.add(u.name);
+              if (!entry || entry.version !== VERSION) unreachable.set(u.id, u);
             }
 
             if (ownerIds.length === 0) {
@@ -1043,10 +1252,16 @@
               `Aucun joueur connecté pour : ${skipped.join(", ")}. Utilisez la macro individuelle "Jet combo" pour ces personnages.`
             );
           }
-          if (outdated.size > 0) {
+          if (unreachable.size > 0) {
+            // Ces joueurs viennent d'être ciblés : le rappel est utile maintenant,
+            // on force donc l'envoi sans attendre la fin du délai anti-spam.
+            const names = [...unreachable.values()].map(u => u.name).join(", ");
+            await sendActivationInvite([...unreachable.values()], { force: true });
+
             ui.notifications.warn(
-              `Version périmée ou macro non lancée pour : ${[...outdated].join(", ")}. ` +
-              `Ces joueurs ne recevront rien tant qu'ils n'auront pas relancé la macro en v${VERSION}.`
+              `Macro non lancée ou version incompatible pour : ${names}. ` +
+              `Un lien d'activation vient de leur être chuchoté dans le chat ; ` +
+              `leur demande de jet sera à renvoyer après leur clic.`
             );
           }
         }
