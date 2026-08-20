@@ -31,42 +31,27 @@ Compatibilité : **FoundryVTT v14 (build 364)**.
 
 ### [`1-ancre-zero.js`](foundry/1-ancre-zero.js) — Définir l'ancre des tuiles/dessins
 
-Ouvre une fenêtre permettant de repositionner le point d'ancrage (X/Y, entre 0 et 1, `0,0` par défaut) des tuiles et/ou des dessins de la scène.
-- Si des tuiles/dessins sont sélectionnés, seuls ceux-ci sont modifiés.
-- Sinon, la macro s'applique à toutes les tuiles et tous les dessins de la scène active.
-- Neuf préréglages rapides (coins, centres, milieu) en plus de la saisie manuelle de X/Y.
-- Des cases à cocher permettent de cibler uniquement les tuiles, uniquement les dessins, ou les deux.
+Repositionne le point d'ancrage (X/Y entre 0 et 1, `0,0` par défaut) des tuiles et des dessins : neuf préréglages rapides — coins, centres, milieu — ou saisie manuelle, avec des cases à cocher pour ne viser que les tuiles, que les dessins, ou les deux. S'applique à la sélection, ou à toute la scène si rien n'est sélectionné.
 
-![Fenêtre de la macro « Définir l'ancre des tuiles/dessins » : sélection, préréglages d'ancrage et cases à cocher Tuiles / Dessins](images/foundry/1-ancre-zero.png)
+<img src="images/foundry/1-ancre-zero.png" alt="Fenêtre de la macro « Définir l'ancre des tuiles/dessins » : sélection, préréglages d'ancrage et cases à cocher Tuiles / Dessins" width="420">
 
 ### [`2-redimensionner-tuiles.js`](foundry/2-redimensionner-tuiles.js) — Redimensionner les tuiles
 
-Redimensionne les tuiles sélectionnées (ou toutes celles de la scène si rien n'est sélectionné), en conservant leur ratio largeur/hauteur. Trois méthodes au choix :
-- à une **hauteur cible** en pixels ;
-- à une **largeur cible** en pixels ;
-- à un **pourcentage** de la taille actuelle (ex : 50 % pour réduire de moitié).
+Redimensionne les tuiles (sélection, ou toute la scène si rien n'est sélectionné) en conservant leur ratio : à une **hauteur cible**, à une **largeur cible**, ou à un **pourcentage** de la taille actuelle. La taille d'origine étant mémorisée dans un flag au premier redimensionnement, un mode **« Restaurer la taille d'origine »** permet de revenir en arrière à tout moment.
 
-La taille d'origine de chaque tuile est sauvegardée dans un flag lors du premier redimensionnement. Le mode **« Restaurer la taille d'origine »** permet de rendre aux tuiles déjà redimensionnées leur taille d'origine (les tuiles jamais redimensionnées ne sont pas affectées), avec un décompte des tuiles concernées.
-
-![Fenêtre de la macro « Redimensionner les tuiles » : décompte des tuiles redimensionnables/restaurables, choix du mode et de la méthode de dimensionnement](images/foundry/2-redimensionner-tuiles.png)
+<img src="images/foundry/2-redimensionner-tuiles.png" alt="Fenêtre de la macro « Redimensionner les tuiles » : décompte des tuiles redimensionnables/restaurables, choix du mode et de la méthode de dimensionnement" width="420">
 
 ### [`3-etiquettes-tuiles.js`](foundry/3-etiquettes-tuiles.js) — Étiquettes de tuiles
 
-Crée automatiquement un texte (sous forme de dessin) sous ou au-dessus de chaque tuile sélectionnée (ou toutes celles de la scène), reprenant le nom du fichier image utilisé comme texture.
-- Personnalisation du texte : police, taille, couleur, hauteur de la zone.
-- Placement au choix : sous la tuile ou au-dessus.
-- Fond de couleur optionnel derrière le texte (couleur + opacité).
-- Options de nettoyage du nom de fichier : ne garder que ce qui suit un caractère séparateur (`-` par défaut) et/ou retirer un numéro en fin de nom (utile pour des noms de fichiers du type `monstre-gobelin-03.webp` → `gobelin`).
+Crée sous ou au-dessus de chaque tuile un dessin de type texte reprenant le nom de son fichier image. Police, taille, couleur, hauteur de la zone et fond de couleur optionnel sont paramétrables ; le nom peut être nettoyé au passage — ne garder que ce qui suit un séparateur, retirer le numéro final (`monstre-gobelin-03.webp` → `gobelin`).
 
-![Fenêtre de la macro « Étiquettes de tuiles » : réglages du texte, du placement, du fond et du nettoyage du nom de fichier](images/foundry/3-etiquettes-tuiles.png)
+<img src="images/foundry/3-etiquettes-tuiles.png" alt="Fenêtre de la macro « Étiquettes de tuiles » : réglages du texte, du placement, du fond et du nettoyage du nom de fichier" width="420">
 
 ### [`4-cacher-scene.js`](foundry/4-cacher-scene.js) — Cacher / afficher la scène
 
-Cache ou affiche en masse les éléments de la scène active : tokens, dessins, tuiles et sources de lumière ambiante, avec un choix indépendant pour chaque catégorie via des cases à cocher.
-- Pour les tokens, possibilité de cibler soit tous ceux de la scène, soit uniquement ceux actuellement sélectionnés sur le plateau.
-- Pratique pour préparer une scène (tout cacher) puis la révéler progressivement, ou tout dévoiler d'un coup.
+Cache ou affiche en masse les tokens, dessins, tuiles et sources de lumière ambiante de la scène, chaque catégorie se cochant indépendamment (pour les tokens : tous ceux de la scène, ou seulement les sélectionnés). Pratique pour préparer une scène puis la dévoiler progressivement.
 
-![Fenêtre de la macro « Cacher / Afficher — Éléments de la scène » : choix de l'action et cases à cocher Tokens / Dessins / Tuiles / Sources de lumière](images/foundry/4-cacher-scene.png)
+<img src="images/foundry/4-cacher-scene.png" alt="Fenêtre de la macro « Cacher / Afficher — Éléments de la scène » : choix de l'action et cases à cocher Tokens / Dessins / Tuiles / Sources de lumière" width="420">
 
 ---
 
@@ -82,26 +67,22 @@ Compatibilité : **FoundryVTT v14 (build 364)** · **Knight v3.58.35**.
 
 #### [`k1-jet-combo-groupe-2carac.js`](knight/k1-jet-combo-groupe-2carac.js) — Jet combo Knight (demande groupée MJ → Joueurs)
 
-Permet au MJ de demander à plusieurs joueurs de lancer un jet combo (deux caractéristiques ou plus) en une seule action, chaque joueur recevant une fenêtre pour compléter et lancer son propre jet.
+Le MJ demande en une seule action un jet combo (deux caractéristiques, parfois trois) à plusieurs joueurs : chacun reçoit sur son écran une fenêtre pour compléter puis lancer son propre jet. Tout passe par le canal socket du système, sans module tiers.
 
-**Fonctionnement :**
-1. **Chaque joueur** exécute la macro une fois en début de session (clic dans la barre de sorts) pour activer l'écoute des demandes du MJ sur son client. Un message discret est envoyé au MJ pour confirmer que l'écoute est active (l'écoute est perdue au rechargement de la page, il faut alors recliquer).
-2. **Le MJ** sélectionne un ou plusieurs tokens de Chevaliers/Méta-armures, lance la macro, puis :
-   - choisit une ou deux caractéristiques de base à proposer aux joueurs (une case à cocher permet d'en imposer une seule) ;
-   - un tableau récapitule les personnages sélectionnés, leur(s) joueur(s) associé(s), et si la macro est bien active chez eux (avec la version) ;
-   - choisit d'utiliser la **fenêtre de jet native de Knight** (recommandé : gère overdrives, capacités d'armure, styles de combat, entraide...) ou une **fenêtre simplifiée** autonome permettant d'ajouter une troisième caractéristique ;
-   - peut activer la fermeture automatique de la fenêtre native après le jet, forcer un jet **sans overdrive** (équivalent du bouton « Sans OD » du système), et ajouter des dés bonus/malus, des succès bonus/malus, ou un seuil de difficulté ;
-   - envoie la demande.
-3. **Chaque joueur concerné** reçoit une fenêtre pour choisir sa caractéristique de base (si deux sont proposées), sa seconde caractéristique (et éventuellement une troisième), puis lance le jet.
+**Activation** — chaque joueur lance la macro une fois par chargement de page pour recevoir les demandes. Le MJ n'a pas à y penser : à chaque exécution, la macro remet à niveau les clients à l'écoute et chuchote un lien d'activation en un clic à ceux qui sont hors de portée. Lancée sans token sélectionné, elle ne fait que cela.
 
-La macro respecte la mécanique réelle du système Knight : les dés lancés correspondent à la somme des caractéristiques, et l'overdrive n'ajoute pas de dé mais des réussites automatiques (uniquement si le personnage est en armure ou en ascension).
+**Fenêtre du MJ** — un tableau donne l'état de la macro chez chaque joueur destinataire. Le MJ choisit une caractéristique de base (ou deux, au choix du joueur), la **fenêtre de jet native de Knight** ou une **fenêtre simplifiée**, un jet **sans overdrive**, la fermeture automatique de la fenêtre après le lancer, puis des dés et succès bonus/malus et un seuil de difficulté.
+
+**Côté joueur** — la fenêtre native de Knight s'ouvre base pré-remplie, précédée s'il y a lieu du choix entre les deux caractéristiques proposées, chacune avec son nombre de dés. La fenêtre simplifiée, elle, lui fait choisir ses caractéristiques puis poste le résultat détaillé dans le chat.
+
+Le calcul suit le système : les dés lancés correspondent à la **somme des caractéristiques**, et l'overdrive n'ajoute pas de dé mais des **réussites automatiques**, uniquement en méta-armure ou en ascension.
 
 **Aperçu :**
 
-Fenêtre du MJ — destinataires et état d'écoute de chaque joueur, choix des caractéristiques de base, options du jet et modificateurs :
+Fenêtre du MJ :
 
-![Fenêtre MJ de la macro « Demander un jet combo » : tableau des destinataires avec la version de la macro active chez chaque joueur, caractéristiques de base, options du jet et modificateurs](images/knight/k1-jet-combo-groupe-2carac-MJ.png)
+<img src="images/knight/k1-jet-combo-groupe-2carac-MJ.png" alt="Fenêtre MJ de la macro « Demander un jet combo » : tableau des destinataires avec la version de la macro active chez chaque joueur, caractéristiques de base, options du jet et modificateurs" width="420">
 
-Fenêtre reçue par le joueur — il choisit la caractéristique de base proposée (le nombre de dés, overdrives inclus, est affiché) avant l'ouverture de la fenêtre de jet de Knight :
+Fenêtre reçue par le joueur :
 
-![Fenêtre joueur de la macro « Jet demandé » : deux caractéristiques proposées avec le nombre de dés correspondant, boutons Continuer et Ignorer](images/knight/k1-jet-combo-groupe-2carac-PJ.png)
+<img src="images/knight/k1-jet-combo-groupe-2carac-PJ.png" alt="Fenêtre joueur de la macro « Jet demandé » : deux caractéristiques proposées avec le nombre de dés correspondant, boutons Continuer et Ignorer" width="420">
