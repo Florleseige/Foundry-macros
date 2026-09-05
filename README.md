@@ -59,6 +59,12 @@ Aligne les **tuiles**, **dessins** et **tokens** sélectionnés (deux au minimum
 
 <img src="images/foundry/5-alligner-elements.png" alt="Fenêtre de la macro « Aligner les éléments » : décompte de la sélection, préréglages d'alignement horizontal et vertical, référence, répartition et accrochage à la grille" width="420">
 
+### [`6-verrouiller-elements.js`](foundry/6-verrouiller-elements.js) — Verrouiller / déverrouiller les éléments
+
+Verrouille, déverrouille ou **inverse** l'état de verrouillage des **tuiles** et des **dessins**, chaque catégorie se cochant indépendamment. S'applique à la sélection en cours, ou à toute la scène si rien n'est sélectionné ; la fenêtre rappelle la portée retenue et le nombre d'éléments déjà verrouillés. Un élément verrouillé ne peut plus être déplacé, redimensionné ni supprimé sur le plateau. (Les tokens et les sources de lumière n'ont pas d'état de verrouillage dans Foundry : pour les masquer, voir `4-cacher-scene.js`.)
+
+<img src="images/foundry/6-verrouiller-elements.png" alt="Fenêtre de la macro « Verrouiller / Déverrouiller — Éléments de la scène » : portée retenue, choix de l'action et cases à cocher Tuiles / Dessins avec le décompte des éléments verrouillés" width="420">
+
 ---
 
 ## Macros spécifiques à un système
