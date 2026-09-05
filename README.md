@@ -53,6 +53,12 @@ Cache ou affiche en masse les tokens, dessins, tuiles et sources de lumière amb
 
 <img src="images/foundry/4-cacher-scene.png" alt="Fenêtre de la macro « Cacher / Afficher — Éléments de la scène » : choix de l'action et cases à cocher Tokens / Dessins / Tuiles / Sources de lumière" width="420">
 
+### [`5-alligner-elements.js`](foundry/5-alligner-elements.js) — Aligner les éléments
+
+Aligne les **tuiles**, **dessins** et **tokens** sélectionnés (deux au minimum, le type étant détecté depuis la sélection) sur l'axe horizontal (bords gauches, centres, bords droits) et/ou vertical (bords hauts, milieux, bords bas), en prenant comme référence les **bornes de la sélection** ou le **premier élément sélectionné**. Une **répartition** horizontale ou verticale complète l'alignement — espaces égaux entre les éléments, ou écart fixe en pixels — et les positions finales peuvent être **accrochées à la grille** de la scène.
+
+<img src="images/foundry/5-alligner-elements.png" alt="Fenêtre de la macro « Aligner les éléments » : décompte de la sélection, préréglages d'alignement horizontal et vertical, référence, répartition et accrochage à la grille" width="420">
+
 ---
 
 ## Macros spécifiques à un système
